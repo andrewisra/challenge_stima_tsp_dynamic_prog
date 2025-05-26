@@ -1,5 +1,12 @@
+require 'benchmark'
+
+def print_matrix(matrix)
+  matrix.each do |row|
+    puts row.map { |v| v.to_s.rjust(4) }.join(' ')
+  end
+end
+
 def total_cost(mask, pos, n, cost, memo)
-  # Basis: jika semua kota sudah dikunjungi, kembali ke kota awal 0
   if mask == (1 << n) - 1
     return cost[pos][0]
   end
@@ -26,45 +33,55 @@ def tsp(cost)
   total_cost(1, 0, n, cost, memo)
 end
 
-# test case 1
-cost = [
-  [0, 10, 15, 20],
-  [10, 0, 35, 25],
-  [15, 35, 0, 30],
-  [20, 25, 30, 0]
-]
-
-result = tsp(cost)
-puts "Biaya perjalanan terpendek TSP adalah: #{result}"
-
-# test case 2
-cost = [
-  [0, 29, 20, 21],
-  [29, 0, 15, 17],
-  [20, 15, 0, 28],
-  [21, 17, 28, 0]
-]
-
-result = tsp(cost)
-puts "Biaya perjalanan terpendek TSP adalah: #{result}"
-
-# test case 3
-cost = [
-  [0, 10, 15],
-  [10, 0, 35],
-  [15, 35, 0]
-]
-
-result = tsp(cost)
-puts "Biaya perjalanan terpendek TSP adalah: #{result}"
-
-# test case 4 with large matrix
-cost = Array.new(20) { Array.new(20, 0) }
-(0...20).each do |i|
-  (0...20).each do |j|
-    cost[i][j] = rand(1..100) if i != j
+def run_test_case(cost, description)
+  puts "===== #{description} ====="
+  puts "Matriks jarak:"
+  print_matrix(cost)
+  time = Benchmark.realtime do
+    result = tsp(cost)
+    puts "Biaya perjalanan terpendek TSP adalah: #{result}"
   end
+  puts "Waktu eksekusi: #{(time * 1000).round(2)} ms\n\n"
 end
 
-result = tsp(cost)
-puts "Biaya perjalanan terpendek TSP untuk matriks besar adalah: #{result}"
+# Test case 1
+cost1 = [
+  [0, 5, 9],
+  [5, 0, 2],
+  [9, 2, 0]
+]
+run_test_case(cost1, "Test case 1 (3 kota)")
+
+# Test case 2
+cost2 = [
+  [0, 3, 1, 5],
+  [2, 0, 4, 2],
+  [3, 6, 0, 7],
+  [5, 2, 3, 0]
+]
+run_test_case(cost2, "Test case 2 (4 kota)")
+
+# Test case 3
+cost3 = [
+  [0, 10, 10, 10, 100],
+  [10, 0, 20, 20, 100],
+  [10, 20, 0, 15, 100],
+  [10, 20, 15, 0, 100],
+  [100, 100, 100, 100, 0]
+]
+run_test_case(cost3, "Test case 3 (5 kota, ada jarak jauh)")
+
+# Test case 4
+cost4 = [
+  [0]
+]
+run_test_case(cost4, "Test case 4 (1 kota)")
+
+# Test case 5: matriks besar 20x20
+cost5 = Array.new(20) { Array.new(20, 0) }
+(0...20).each do |i|
+  (0...20).each do |j|
+    cost5[i][j] = rand(1..100) if i != j
+  end
+end
+run_test_case(cost5, "Test case 5 (20 kota, matriks besar acak)")
